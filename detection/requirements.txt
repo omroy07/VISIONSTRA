@@ -1,6 +1,0 @@
-flask
-opencv-python
-numpy
-tensorflow
-keras-facenet
-scipy

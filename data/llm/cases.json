@@ -1,0 +1,47 @@
+[
+  {
+    "question": "Which city is the capital of Australia?",
+    "context": "Australia's largest city is Sydney, but the federal capital is Canberra, which was purpose-built and chosen as a compromise between Sydney and Melbourne.",
+    "reference": "Canberra"
+  },
+  {
+    "question": "How many bones are there in an adult human body?",
+    "context": "Babies are born with around 300 bones. Many of them fuse as a child grows, and an adult human body has 206 bones.",
+    "reference": "206"
+  },
+  {
+    "question": "At what temperature does water boil at sea level in Fahrenheit?",
+    "context": "At standard sea-level pressure water boils at 100 degrees Celsius, which is 212 degrees Fahrenheit. At higher altitude the boiling point drops.",
+    "reference": "212"
+  },
+  {
+    "question": "Who developed the theory of general relativity?",
+    "context": "General relativity was published by Albert Einstein in 1915. It describes gravity as the curvature of spacetime caused by mass and energy.",
+    "reference": "Albert Einstein"
+  },
+  {
+    "question": "What is the chemical symbol for gold?",
+    "context": "Gold is a dense, soft metal. Its chemical symbol is Au, taken from the Latin word aurum.",
+    "reference": "Au"
+  },
+  {
+    "question": "Which planet is known as the Red Planet?",
+    "context": "Mars is often called the Red Planet because iron oxide on its surface gives it a reddish colour. It is the fourth planet from the Sun.",
+    "reference": "Mars"
+  },
+  {
+    "question": "In what year did the Berlin Wall fall?",
+    "context": "The Berlin Wall was built in 1961 and stood until November 1989, when East Germany opened the border. Germany was reunified in 1990.",
+    "reference": "1989"
+  },
+  {
+    "question": "What is the largest ocean on Earth?",
+    "context": "The Pacific Ocean covers about 63 million square miles, more than any other ocean. The Atlantic is the second largest.",
+    "reference": "Pacific Ocean"
+  },
+  {
+    "question": "What is the name of the current Prime Minister of Mars Colony One?",
+    "context": "Mars is the fourth planet from the Sun. No human settlement exists there yet, only robotic rovers and orbiters.",
+    "reference": "cannot tell from the context"
+  }
+]
