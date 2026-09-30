@@ -1,0 +1,20 @@
+{
+  "scoring": {
+    "high_cutoff": 70,
+    "medium_cutoff": 40,
+    "type_groups": {
+      "vehicle": {"weight": 34}
+    },
+    "imminent_ttc_s": 2.5
+  },
+  "motion": {
+    "min_speed_mps": 0.3
+  },
+  "alerts": {
+    "cooldown_s": {"HIGH": 3.0, "MEDIUM": 5.0},
+    "speak_priorities": ["HIGH", "MEDIUM"]
+  },
+  "camera": {
+    "focal_length_px": 700
+  }
+}

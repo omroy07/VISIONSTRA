@@ -1,0 +1,51 @@
+/* 🌌 AI VISION BACKGROUND */
+body {
+  background: linear-gradient(120deg,
+      #020617,
+      #0f172a,
+      #020617);
+  background-size: 200% 200%;
+  animation: glowMove 12s ease infinite;
+
+  color: #e5e7eb;
+  text-align: center;
+  font-family: Arial, sans-serif;
+}
+
+@keyframes glowMove {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* 🎥 CANVAS (DETECTION VIEW) */
+canvas {
+  border: 2px solid #22d3ee;
+  border-radius: 12px;
+  box-shadow: 0 0 25px rgba(34, 211, 238, 0.35);
+  background: black;
+}
+
+/* 📄 DEBUG / LOG PANEL */
+pre {
+  text-align: left;
+  margin: 12px auto;
+  width: 640px;
+  background: rgba(30, 41, 59, 0.85);
+  backdrop-filter: blur(6px);
+  padding: 12px;
+  border-radius: 8px;
+  overflow-x: auto;
+  border: 1px solid #334155;
+  box-shadow: 0 0 15px rgba(15, 23, 42, 0.7);
+  color: #e5e7eb;
+  font-size: 13px;
+}

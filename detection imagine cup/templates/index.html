@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Live Camera Recognition</title>
+
+  <style>
+    /* 🔥 Glow Background */
+    .glow-bg {
+      background: linear-gradient(120deg, #0f172a, #020617, #0f172a);
+      background-size: 200% 200%;
+      animation: glowMove 10s ease infinite;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #e5e7eb;
+      font-family: Arial, sans-serif;
+    }
+
+    @keyframes glowMove {
+      0% {
+        background-position: 0% 50%;
+      }
+
+      50% {
+        background-position: 100% 50%;
+      }
+
+      100% {
+        background-position: 0% 50%;
+      }
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.08);
+      padding: 30px;
+      border-radius: 18px;
+      box-shadow: 0 0 30px rgba(34, 211, 238, 0.25);
+      text-align: center;
+      width: 420px;
+    }
+
+    h2 {
+      color: #22d3ee;
+      margin-bottom: 15px;
+    }
+
+    video {
+      width: 100%;
+      border-radius: 14px;
+      border: 3px solid #22d3ee;
+      margin-top: 10px;
+    }
+
+    button {
+      margin-top: 18px;
+      background: #22d3ee;
+      border: none;
+      padding: 12px 22px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #06b6d4;
+    }
+
+    .output {
+      margin-top: 20px;
+      padding: 15px;
+      border-radius: 12px;
+      font-size: 16px;
+    }
+
+    .success {
+      background: rgba(34, 197, 94, 0.15);
+      border: 1px solid #22c55e;
+      color: #22c55e;
+    }
+
+    .error {
+      background: rgba(239, 68, 68, 0.15);
+      border: 1px solid #ef4444;
+      color: #ef4444;
+    }
+
+    .name {
+      font-size: 22px;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    .score {
+      font-size: 14px;
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body class="glow-bg">
+
+  <div class="card">
+    <h2>Live Camera Recognition</h2>
+
+    <video id="video" autoplay playsinline></video>
+
+    <button id="captureBtn">Capture & Recognize</button>
+
+    <div id="output" class="output" style="display:none;"></div>
+  </div>
+
+  <script>
+    const video = document.getElementById("video");
+    const output = document.getElementById("output");
+    const captureBtn = document.getElementById("captureBtn");
+
+    // Start camera
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(stream => video.srcObject = stream)
+      .catch(() => alert("Camera access denied"));
+
+    captureBtn.onclick = async () => {
+      output.style.display = "block";
+      output.className = "output";
+      output.innerHTML = "⏳ Processing...";
+
+      const canvas = document.createElement("canvas");
+      canvas.width = video.videoWidth;
+      canvas.height = video.videoHeight;
+      canvas.getContext("2d").drawImage(video, 0, 0);
+
+      canvas.toBlob(async blob => {
+        const formData = new FormData();
+        formData.append("image", blob, "frame.png");
+
+        const response = await fetch("/recognize", {
+          method: "POST",
+          body: formData
+        });
+
+        const data = await response.json();
+
+        if (!data.recognized || data.identity === "Unknown") {
+          output.classList.add("error");
+          output.innerHTML = `
+            <div class="name">❌ Unknown Person</div>
+            <div class="score">No strong match found</div>
+          `;
+        } else {
+          output.classList.add("success");
+          output.innerHTML = `
+            <div class="name">✅ ${data.identity}</div>
+            <div class="score">Match Score: ${data.match_score}</div>
+          `;
+        }
+      });
+    };
+  </script>
+
+</body>
+
+</html>
