@@ -1,85 +1,67 @@
-# VisionSTRA 🚦
+# Model evaluation framework
 
-**VisionSTRA** is a browser-based, privacy-first AI road safety assistant designed to help visually impaired users navigate streets independently and safely using real-time computer vision and multimodal feedback.
+Small toolkit to benchmark AI models with numbers instead of impressions. It covers two cases:
 
----
+- **Object detection (CV):** precision, recall, F1, mAP@0.5, mAP@0.5:0.95, latency, FPS
+- **LLM answers:** accuracy, relevance, groundedness, hallucination rate, latency, token usage and cost
 
-## 🌟 Key Features
-- **Real-time Detection**: Vehicles, pedestrians, obstacles, and traffic signals  
-- **Browser-Based**: Runs fully in the browser—no app installation  
-- **Privacy-First**: Camera data processed locally; no video uploads  
-- **Multimodal Alerts**: Voice, visual, and vibration feedback  
-- **Lightweight & Fast**: Optimized for low-end smartphones  
-- **Accessibility-Focused**: Inclusive UI aligned with WCAG principles  
+Every number is computed from a dataset at run time. Each run is saved as a json file, so model versions or settings can be compared later.
 
----
+## Setup
 
-## 🎯 Problem We Solve
-Visually impaired individuals often face unsafe and dependent road navigation due to limited real-time awareness. VisionSTRA transforms a device camera into an intelligent safety companion.
+```
+python -m venv .venv
+.venv\Scripts\activate          # Linux/Mac: source .venv/bin/activate
+pip install -r requirements.txt
+python -m pytest                # 21 tests, should all pass
+```
 
----
+## Run the CV benchmark
 
-## 👥 Target Users
-**Primary**
-- Visually impaired individuals (partial or complete blindness)  
-- Age: 15–60 years  
-- Urban & semi-urban smartphone users  
+```
+python data/download.py         # YOLOv8n (ONNX) + COCO128, about 20 MB
+python run_cv.py --name yolov8n-nms0.7
+python run_cv.py --name yolov8n-nms0.5 --nms-iou 0.5
+python compare.py results/cv_yolov8n-nms0.7.json results/cv_yolov8n-nms0.5.json
+```
 
-**Secondary**
-- Elderly users with age-related vision loss  
-- NGOs & rehabilitation centers  
-- Families and caregivers  
+Use your own data: point `--images` and `--labels` at a folder of images and a folder of YOLO-format `.txt` labels (`class cx cy w h`, normalised). Use your own model: replace `models/yolo_onnx.py` with any callable that takes a BGR image and returns `{"boxes": xyxy, "scores": ..., "cls": ...}`.
 
----
+## Run the LLM benchmark
 
-## 🧠 How It Works
-1. Open VisionSTRA in a supported browser  
-2. Allow camera access  
-3. AI analyzes the live feed locally  
-4. Hazards are detected in real time  
-5. Alerts are delivered via voice/visual cues  
+```
+pip install anthropic
+set ANTHROPIC_API_KEY=...       # Linux/Mac: export
+python run_llm.py --name sonnet-run1 --model claude-sonnet-5 --price-in 3 --price-out 15
+```
 
----
+Test cases live in `data/llm/cases.json` (`question`, optional `context`, optional `reference`). If a metric can't be computed, for example groundedness without a context, it is listed under `not_applicable` in the result instead of being reported as 0. Prices are per 1M tokens and must be passed in; without them cost is shown as not applicable.
 
-## 🛠️ Tech Stack
-- **Frontend**: HTML, Tailwind CSS, JavaScript  
-- **AI/ML**: Computer Vision (object detection)  
-- **APIs**: Browser Camera APIs, Web Audio  
-- **Hosting**: Vercel  
+To test another LLM, write a function `generate(question, context) -> {"text", "input_tokens", "output_tokens"}` like the one in `models/claude_api.py`.
 
----
+## Sample results
 
-## 🌍 Diversity & Inclusion
-Built with inclusive design principles to support diverse visual abilities, ages, devices, and environments—empowering independence with dignity through multimodal feedback.
+YOLOv8n on COCO128 (128 images, 929 boxes), conf 0.25, IoU 0.5 for P/R/F1:
 
----
+| run | precision | recall | F1 | mAP50 | mAP50-95 | latency (mean) | FPS |
+|---|---|---|---|---|---|---|---|
+| yolov8n-nms0.7 | 0.713 | 0.498 | 0.587 | 0.594 | 0.443 | 76.8 ms | 13.0 |
+| yolov8n-nms0.5 | 0.757 | 0.494 | 0.598 | 0.604 | 0.441 | 79.1 ms | 12.7 |
 
-## 🚀 Getting Started
-1. Open the website in a modern browser  
-2. Allow camera permissions  
-3. Start real-time detection  
+Raw files are in `results/`. Please read these before quoting the numbers:
 
----
+- COCO128 is taken from COCO train2017, which YOLOv8 was trained on, so accuracy here is optimistic. It shows the pipeline works, not how the model generalises. Use a held-out set for real decisions.
+- Latency/FPS were measured on an Intel Core i3-1115G4 (2 cores), 8 GB RAM, Windows, CPU only (onnxruntime). They cover preprocessing, inference and NMS, but not image decoding. Latency varies slightly from run to run and between machines; the accuracy metrics do not.
+- The LLM side is covered by unit tests with fake models only. No real LLM run is included yet because it needs an API key.
 
-## 📈 Roadmap
-- Directional & distance-based alerts  
-- Offline mode optimization  
-- NGO & city-level pilots  
-- Wearable device integration  
+More detail on the formulas and choices is in `docs/methodology.md`.
 
----
+## Layout
 
-## 👨‍💻 Team
-- **Om Roy** – Founder, Team Lead & ML Engineer  
-- **Anshika** – ML & Frontend Engineer  
-- **Shubhangi** – Pitch & Visual Storytelling Lead  
-- **Anushika** – Research & Growth Lead  
-
----
-
-## 📄 License
-For educational, research, and social impact purposes.
-
----
-
-**VisionSTRA — Where Vision Meets Intelligence.**
+```
+evalkit/     metrics, timing, llm loop, result storage
+models/      YOLO ONNX wrapper, Anthropic wrapper
+data/        download script, LLM test cases
+run_cv.py  run_llm.py  compare.py
+tests/  results/  docs/
+```

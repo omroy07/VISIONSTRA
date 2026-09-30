@@ -1,0 +1,7 @@
+numpy>=1.24
+opencv-python-headless>=4.8
+onnxruntime>=1.16
+# only for run_llm.py
+anthropic>=0.40
+# tests
+pytest>=7.4

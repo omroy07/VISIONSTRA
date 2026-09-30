@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.pytest_cache/
+models/weights/
+data/coco128/
+data/coco128.zip
+.venv/
