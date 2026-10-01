@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Road Safety | VisionSTRA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    .glow-bg {
+      background-size: 200% 200%;
+      animation: glowMove 10s ease infinite;
+    }
+    @keyframes glowMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+  </style>
+</head>
+
+<body class="bg-black text-gray-200 opacity-0 transition-opacity duration-700">
+
+<!-- ================= HEADER ================= -->
+
+<header class="fixed top-0 w-full z-50 bg-black/90 backdrop-blur-xl border-b border-cyan-500/20">
+  <div class="max-w-7xl mx-auto px-6 py-4 grid grid-cols-3 items-center">
+
+    <!-- LEFT: LOGO (BIGGER) -->
+    <div class="flex items-center gap-3">
+      <img
+        src="image/visionstra.png"
+        alt="VisionSTRA Logo"
+        class="h-14 w-auto drop-shadow-[0_0_12px_rgba(34,211,238,0.7)]"
+      />
+      <span class="text-2xl font-extrabold tracking-wide hidden sm:block">
+        <span class="text-green-400">VISION</span><span class="text-blue-300">STRA</span>
+      </span>
+    </div>
+
+    <!-- CENTER: NAVIGATION -->
+    <nav class="flex justify-center gap-8 text-gray-300 font-medium">
+      <a href="index.html" class="hover:text-cyan-400 transition">Home</a>
+      <a href="road.html" class="hover:text-cyan-400 transition">Road</a>
+      <a href="public.html" class="hover:text-cyan-400 transition">Public</a>
+      <a href="family.html" class="hover:text-cyan-400 transition">Family</a>
+    </nav>
+
+    <!-- RIGHT: UPLOAD BUTTON -->
+    <div class="flex justify-end">
+      <a
+        href="upload.html"
+        class="px-6 py-2 rounded-xl bg-cyan-500 text-black font-semibold
+               hover:bg-cyan-400 transition shadow-lg"
+      >
+        Upload
+      </a>
+    </div>
+
+  </div>
+</header>
+     
+<!-- ================= HERO ================= -->
+<section class="pt-40 pb-28 text-center relative overflow-hidden bg-black">
+
+  <!-- Neon glow background -->
+  <div class="absolute inset-0 glow-bg
+              bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-yellow-400/10 blur-3xl"></div>
+
+  <div class="relative max-w-4xl mx-auto px-6">
+    <span class="inline-block mb-6 px-4 py-1 text-sm rounded-full
+                 bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
+      Road Navigation Assistance
+    </span>
+
+    <h2 class="text-5xl md:text-6xl font-extrabold mb-6 leading-tight text-white">
+      Road<br class="hidden md:block">
+      <span class="text-cyan-400">Safety & Awareness</span>
+    </h2>
+
+    <p class="max-w-3xl mx-auto text-lg md:text-xl text-gray-400">
+      VisionSTRA helps users safely navigate roads by detecting vehicles,
+      estimating distance, and providing real-time alerts during crossings.
+    </p>
+  </div>
+</section>
+
+<!-- ================= CONTENT ================= -->
+<section class="max-w-6xl mx-auto px-6 py-24 grid md:grid-cols-2 gap-12">
+
+  <!-- Card 1 -->
+  <div class="bg-gray-900 border border-cyan-400/20 p-10 rounded-3xl
+              hover:-translate-y-3 hover:shadow-cyan-400/20 transition">
+    <h3 class="text-2xl font-semibold mb-4 text-cyan-400">
+      🚗 Vehicle Detection
+    </h3>
+    <p class="text-gray-400 text-lg">
+      VisionSTRA identifies approaching vehicles in real time,
+      helping users assess when it is safe to cross the road.
+    </p>
+  </div>
+
+  <!-- Card 2 -->
+  <div class="bg-gray-900 border border-yellow-400/20 p-10 rounded-3xl
+              hover:-translate-y-3 hover:shadow-yellow-400/20 transition">
+    <h3 class="text-2xl font-semibold mb-4 text-yellow-400">
+      📏 Distance & Direction Alerts
+    </h3>
+    <p class="text-gray-400 text-lg">
+      AI-based distance estimation and movement direction
+      trigger timely voice, visual, or vibration alerts.
+    </p>
+  </div>
+
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-black border-t border-cyan-500/20 text-gray-500 py-10 text-center">
+  <p class="font-medium">
+    © 2026 <span class="text-white">VISION</span><span class="text-yellow-400">STRA</span>
+  </p>
+  <p class="text-sm mt-2">
+    Real-Time Road Safety Assistant for Visually Impaired
+  </p>
+</footer>
+
+<script>
+  document.addEventListener("DOMContentLoaded", () => {
+    document.body.classList.remove("opacity-0");
+  });
+</script>
+
+</body>
+</html>

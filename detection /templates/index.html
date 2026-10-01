@@ -1,0 +1,1078 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visionstra – Intelligent Hazard Detection</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    /* ============================================================
+       RESET & BASE
+       ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #020617;
+      color: #e2e8f0;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Subtle animated gradient behind everything */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 20% 50%, rgba(34,211,238,0.06) 0%, transparent 60%),
+                  radial-gradient(ellipse at 80% 30%, rgba(99,102,241,0.05) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       HEADER
+       ============================================================ */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-brand .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #22d3ee;
+      box-shadow: 0 0 12px rgba(34,211,238,0.6);
+      animation: pulseDot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulseDot {
+      0%, 100% { box-shadow: 0 0 8px rgba(34,211,238,0.5); }
+      50% { box-shadow: 0 0 20px rgba(34,211,238,0.9); }
+    }
+
+    .header-brand h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .header-brand h1 span:first-child { color: #22c55e; }
+    .header-brand h1 span:last-child { color: #38bdf8; }
+
+    .header-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-nav a {
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .header-nav a:hover,
+    .header-nav a.active {
+      color: #22d3ee;
+      border-color: rgba(34,211,238,0.25);
+      background: rgba(34,211,238,0.06);
+    }
+
+    .header-controls {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn {
+      padding: 9px 20px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      transition: all 0.2s ease;
+    }
+
+    .btn-start {
+      background: linear-gradient(135deg, #22d3ee, #06b6d4);
+      color: #020617;
+      box-shadow: 0 0 16px rgba(34,211,238,0.25);
+    }
+
+    .btn-start:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 28px rgba(34,211,238,0.45);
+    }
+
+    .btn-stop {
+      background: linear-gradient(135deg, #ef4444, #dc2626);
+      color: #fff;
+      box-shadow: 0 0 12px rgba(239,68,68,0.25);
+    }
+
+    .btn-stop:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 24px rgba(239,68,68,0.4);
+    }
+
+    /* ============================================================
+       MAIN LAYOUT
+       ============================================================ */
+    .main {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: 1fr 380px;
+      gap: 20px;
+      max-width: 1320px;
+      margin: 20px auto;
+      padding: 0 20px;
+    }
+
+    /* ============================================================
+       VIDEO PANEL
+       ============================================================ */
+    .video-panel {
+      position: relative;
+      border-radius: 16px;
+      overflow: hidden;
+      background: #0f172a;
+      border: 2px solid rgba(34,211,238,0.15);
+      box-shadow: 0 0 30px rgba(2,6,23,0.8);
+    }
+
+    .video-panel #videoFeed {
+      width: 100%;
+      height: auto;
+      min-height: 420px;
+      display: none;
+      object-fit: contain;
+      background: #000;
+    }
+
+    .video-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 420px;
+      gap: 16px;
+      color: #475569;
+    }
+
+    .video-placeholder .cam-icon {
+      font-size: 56px;
+      opacity: 0.4;
+    }
+
+    .video-placeholder p {
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    /* ── Flash Alert Overlay ── */
+    .flash-overlay {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      border-radius: 14px;
+      border: 4px solid transparent;
+      transition: border-color 0.3s ease;
+      z-index: 10;
+    }
+
+    .flash-overlay.danger {
+      border-color: #ef4444;
+      animation: flashPulse 0.6s ease-in-out infinite;
+    }
+
+    @keyframes flashPulse {
+      0%, 100% { border-color: rgba(239,68,68,0.9); box-shadow: inset 0 0 40px rgba(239,68,68,0.15); }
+      50% { border-color: rgba(239,68,68,0.3); box-shadow: inset 0 0 10px rgba(239,68,68,0.05); }
+    }
+
+    .flash-banner {
+      position: absolute;
+      top: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(239, 68, 68, 0.92);
+      backdrop-filter: blur(8px);
+      color: #fff;
+      padding: 10px 28px;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 800;
+      letter-spacing: 0.5px;
+      z-index: 11;
+      display: none;
+      box-shadow: 0 4px 24px rgba(239,68,68,0.5);
+      animation: bannerSlide 0.3s ease;
+      white-space: nowrap;
+    }
+
+    .flash-banner.visible { display: block; }
+
+    @keyframes bannerSlide {
+      from { transform: translateX(-50%) translateY(-20px); opacity: 0; }
+      to { transform: translateX(-50%) translateY(0); opacity: 1; }
+    }
+
+    /* ============================================================
+       DASHBOARD SIDEBAR
+       ============================================================ */
+    .dashboard {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      border-radius: 14px;
+      padding: 18px;
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #64748b;
+      margin-bottom: 14px;
+    }
+
+    /* ── Danger Gauge ── */
+    .gauge-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    #gaugeCanvas {
+      width: 240px;
+      height: 140px;
+    }
+
+    .gauge-score {
+      font-size: 42px;
+      font-weight: 900;
+      margin-top: -10px;
+      transition: color 0.3s ease;
+    }
+
+    .gauge-score.safe { color: #22c55e; }
+    .gauge-score.caution { color: #f59e0b; }
+    .gauge-score.danger { color: #ef4444; }
+
+    .gauge-label {
+      font-size: 12px;
+      color: #64748b;
+      font-weight: 500;
+      margin-top: 2px;
+    }
+
+    /* ── Scene Status ── */
+    .scene-status {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 10px;
+      font-weight: 700;
+      font-size: 14px;
+      letter-spacing: 0.5px;
+      transition: all 0.4s ease;
+    }
+
+    .scene-status.safe {
+      background: rgba(34, 197, 94, 0.1);
+      border: 1px solid rgba(34, 197, 94, 0.3);
+      color: #4ade80;
+    }
+
+    .scene-status.caution {
+      background: rgba(245, 158, 11, 0.1);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: #fbbf24;
+    }
+
+    .scene-status.danger {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.35);
+      color: #f87171;
+      animation: statusPulse 1.5s ease-in-out infinite;
+    }
+
+    @keyframes statusPulse {
+      0%, 100% { box-shadow: 0 0 8px rgba(239,68,68,0.15); }
+      50% { box-shadow: 0 0 20px rgba(239,68,68,0.3); }
+    }
+
+    .scene-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .scene-status.safe .scene-dot { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    .scene-status.caution .scene-dot { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+    .scene-status.danger .scene-dot { background: #ef4444; box-shadow: 0 0 8px #ef4444; }
+
+    /* ── Priority Counters ── */
+    .priority-counters {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .counter {
+      text-align: center;
+      padding: 10px 6px;
+      border-radius: 10px;
+      background: rgba(2, 6, 23, 0.6);
+    }
+
+    .counter-num {
+      font-size: 26px;
+      font-weight: 900;
+      line-height: 1;
+    }
+
+    .counter-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-top: 4px;
+    }
+
+    .counter.high .counter-num { color: #ef4444; }
+    .counter.high .counter-label { color: #fca5a5; }
+    .counter.medium .counter-num { color: #f59e0b; }
+    .counter.medium .counter-label { color: #fcd34d; }
+    .counter.low .counter-num { color: #6b7280; }
+    .counter.low .counter-label { color: #9ca3af; }
+
+    /* ── Detection List ── */
+    .det-list {
+      max-height: 200px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .det-list::-webkit-scrollbar { width: 4px; }
+    .det-list::-webkit-scrollbar-track { background: transparent; }
+    .det-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+    .det-tag {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      background: rgba(2, 6, 23, 0.7);
+      border-left: 3px solid #475569;
+      transition: all 0.2s ease;
+    }
+
+    .det-tag.high {
+      border-left-color: #ef4444;
+      background: rgba(239,68,68,0.06);
+    }
+
+    .det-tag.medium {
+      border-left-color: #f59e0b;
+      background: rgba(245,158,11,0.06);
+    }
+
+    .det-tag.low {
+      border-left-color: #475569;
+    }
+
+    .det-tag .pri-pill {
+      font-size: 10px;
+      font-weight: 800;
+      padding: 3px 8px;
+      border-radius: 6px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .det-tag.high .pri-pill { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .det-tag.medium .pri-pill { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .det-tag.low .pri-pill { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+    .det-tag .det-info {
+      flex: 1;
+      font-weight: 500;
+      color: #cbd5e1;
+    }
+
+    .det-tag .primary-badge {
+      font-size: 9px;
+      font-weight: 800;
+      background: #ef4444;
+      color: #fff;
+      padding: 2px 7px;
+      border-radius: 5px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .det-empty {
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      padding: 20px;
+    }
+
+    .det-tag .det-score {
+      font-size: 12px;
+      font-weight: 800;
+      color: #e2e8f0;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    /* ── Primary Hazard ── */
+    .primary-empty {
+      text-align: center;
+      color: #475569;
+      font-size: 13px;
+      padding: 14px;
+    }
+
+    .primary-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .primary-name {
+      font-size: 18px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+
+    .primary-meta {
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 2px;
+    }
+
+    .primary-pill {
+      font-size: 11px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 8px;
+      letter-spacing: 0.5px;
+      flex-shrink: 0;
+    }
+
+    .primary-pill.high { background: rgba(239,68,68,0.2); color: #fca5a5; }
+    .primary-pill.medium { background: rgba(245,158,11,0.2); color: #fcd34d; }
+    .primary-pill.low { background: rgba(100,116,139,0.2); color: #94a3b8; }
+
+    .primary-reason {
+      font-size: 12px;
+      line-height: 1.55;
+      color: #94a3b8;
+      padding: 10px 12px;
+      background: rgba(2,6,23,0.5);
+      border-radius: 10px;
+      border: 1px solid #1e293b;
+      margin-top: 10px;
+    }
+
+    /* ── Score breakdown bars (shared shape with the test demo) ── */
+    .factor-row {
+      display: grid;
+      grid-template-columns: 78px 1fr 44px;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      margin-top: 6px;
+    }
+
+    .factor-name { color: #94a3b8; font-weight: 600; }
+
+    .factor-track {
+      position: relative;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(51,65,85,0.35);
+      overflow: hidden;
+    }
+
+    .factor-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: 4px;
+      background: #22d3ee;
+    }
+
+    .factor-fill.negative { background: #a78bfa; }
+
+    .factor-value {
+      text-align: right;
+      color: #e2e8f0;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Alert History ── */
+    .alert-list {
+      max-height: 150px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .alert-list::-webkit-scrollbar { width: 4px; }
+    .alert-list::-webkit-scrollbar-track { background: transparent; }
+    .alert-list::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+
+    .alert-entry {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 12px;
+      background: rgba(2, 6, 23, 0.5);
+      animation: alertIn 0.3s ease;
+    }
+
+    @keyframes alertIn {
+      from { opacity: 0; transform: translateX(-10px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    .alert-entry .alert-time {
+      color: #475569;
+      font-weight: 600;
+      font-variant-numeric: tabular-nums;
+      flex-shrink: 0;
+    }
+
+    .alert-entry .alert-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .alert-entry .alert-dot.high { background: #ef4444; }
+    .alert-entry .alert-dot.medium { background: #f59e0b; }
+
+    .alert-entry .alert-text {
+      color: #94a3b8;
+      font-weight: 500;
+    }
+
+    .alert-empty {
+      text-align: center;
+      color: #334155;
+      font-size: 12px;
+      padding: 14px;
+    }
+
+    /* ============================================================
+       RESPONSIVE
+       ============================================================ */
+    @media (max-width: 900px) {
+      .main {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard {
+        order: 2;
+      }
+
+      .video-panel {
+        order: 1;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="logo-dot"></div>
+      <h1><span>VISION</span><span>STRA</span></h1>
+    </div>
+
+    <div class="header-nav">
+      <a href="/" class="active">Live Detection</a>
+      <a href="/test_demo">Test Demo</a>
+    </div>
+
+    <div class="header-controls">
+      <button class="btn btn-start" onclick="startCamera()">▶ Start Camera</button>
+      <button class="btn btn-stop" onclick="stopCamera()">■ Stop</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════ MAIN ═══════════════════ -->
+  <div class="main">
+
+    <!-- ─── Video Feed ─── -->
+    <div class="video-panel">
+      <div class="flash-overlay" id="flashOverlay"></div>
+      <div class="flash-banner" id="flashBanner">⚠ APPROACHING</div>
+      <img id="videoFeed" src="">
+      <div class="video-placeholder" id="videoPlaceholder">
+        <div class="cam-icon">📷</div>
+        <p>Press "Start Camera" to begin detection</p>
+      </div>
+    </div>
+
+    <!-- ─── Dashboard Sidebar ─── -->
+    <div class="dashboard">
+
+      <!-- Danger Gauge -->
+      <div class="panel">
+        <div class="panel-title">Threat Level</div>
+        <div class="gauge-wrap">
+          <canvas id="gaugeCanvas" width="480" height="280"></canvas>
+          <div class="gauge-score safe" id="gaugeScore">0</div>
+          <div class="gauge-label">Top Hazard Score</div>
+        </div>
+      </div>
+
+      <!-- Primary Hazard: the one the voice talks about, and why -->
+      <div class="panel">
+        <div class="panel-title">Primary Hazard</div>
+        <div id="primaryHazard">
+          <div class="primary-empty">Nothing to report</div>
+        </div>
+      </div>
+
+      <!-- Scene Status + Counters -->
+      <div class="panel">
+        <div class="panel-title">Scene Analysis</div>
+        <div class="scene-status safe" id="sceneStatus">
+          <div class="scene-dot"></div>
+          <span>SAFE — No Hazards</span>
+        </div>
+        <div class="priority-counters">
+          <div class="counter high">
+            <div class="counter-num" id="countHigh">0</div>
+            <div class="counter-label">High</div>
+          </div>
+          <div class="counter medium">
+            <div class="counter-num" id="countMed">0</div>
+            <div class="counter-label">Medium</div>
+          </div>
+          <div class="counter low">
+            <div class="counter-num" id="countLow">0</div>
+            <div class="counter-label">Low</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Detection List -->
+      <div class="panel">
+        <div class="panel-title">Active Detections</div>
+        <div class="det-list" id="detectionList">
+          <div class="det-empty">No objects detected</div>
+        </div>
+      </div>
+
+      <!-- Alert History -->
+      <div class="panel">
+        <div class="panel-title">Spoken Alerts</div>
+        <div class="alert-list" id="alertHistory">
+          <div class="alert-empty">No alerts yet</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+  <script>
+    // ── DOM refs ──
+    const videoEl        = document.getElementById('videoFeed');
+    const placeholder    = document.getElementById('videoPlaceholder');
+    const detectionList  = document.getElementById('detectionList');
+    const flashOverlay   = document.getElementById('flashOverlay');
+    const flashBanner    = document.getElementById('flashBanner');
+    const gaugeCanvas    = document.getElementById('gaugeCanvas');
+    const gaugeScoreEl   = document.getElementById('gaugeScore');
+    const sceneStatusEl  = document.getElementById('sceneStatus');
+    const countHighEl    = document.getElementById('countHigh');
+    const countMedEl     = document.getElementById('countMed');
+    const countLowEl     = document.getElementById('countLow');
+    const alertHistoryEl = document.getElementById('alertHistory');
+    const primaryEl      = document.getElementById('primaryHazard');
+
+    const gaugeCtx = gaugeCanvas.getContext('2d');
+
+    // ── State ──
+    let currentGaugeScore = 0;  // for smooth animation
+    let targetGaugeScore  = 0;
+    let topPriority       = 'LOW';
+
+    // Detection labels and reasons are shown as text, never as markup.
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[ch]);
+    }
+
+    function distanceOf(det) {
+      const d = det.smoothed_distance_m ?? det.distance;
+      return (d != null && d > 0) ? `${Number(d).toFixed(1)}m` : '?';
+    }
+
+    function movementOf(det) {
+      if (det.movement === 'approaching') return ' ↓ approaching';
+      if (det.movement === 'receding') return ' ↑ moving away';
+      return '';
+    }
+
+    // ════════════════════════════════════════════════
+    //  CAMERA CONTROLS
+    // ════════════════════════════════════════════════
+    async function startCamera() {
+      await fetch('/start_camera');
+      videoEl.src = '/video_feed';
+      videoEl.style.display = 'block';
+      placeholder.style.display = 'none';
+    }
+
+    async function stopCamera() {
+      await fetch('/stop_camera');
+      videoEl.src = '';
+      videoEl.style.display = 'none';
+      placeholder.style.display = 'flex';
+      // Reset dashboard
+      targetGaugeScore = 0;
+      topPriority = 'LOW';
+      primaryEl.innerHTML = '<div class="primary-empty">Nothing to report</div>';
+      updateSceneStatus('safe', 'SAFE — No Hazards');
+      countHighEl.textContent = '0';
+      countMedEl.textContent  = '0';
+      countLowEl.textContent  = '0';
+      detectionList.innerHTML = '<div class="det-empty">No objects detected</div>';
+      flashOverlay.classList.remove('danger');
+      flashBanner.classList.remove('visible');
+    }
+
+    // ════════════════════════════════════════════════
+    //  GAUGE DRAWING
+    // ════════════════════════════════════════════════
+    function drawGauge(score) {
+      const W = gaugeCanvas.width;
+      const H = gaugeCanvas.height;
+      const cx = W / 2;
+      const cy = H - 20;
+      const radius = Math.min(cx, cy) - 20;
+
+      gaugeCtx.clearRect(0, 0, W, H);
+
+      // Background arc
+      gaugeCtx.beginPath();
+      gaugeCtx.arc(cx, cy, radius, Math.PI, 0);
+      gaugeCtx.lineWidth = 26;
+      gaugeCtx.strokeStyle = 'rgba(51, 65, 85, 0.35)';
+      gaugeCtx.lineCap = 'round';
+      gaugeCtx.stroke();
+
+      // Colored arc — draw segment up to score
+      if (score > 0) {
+        const endAngle = Math.PI - (score / 100) * Math.PI;
+        const grad = gaugeCtx.createLinearGradient(cx - radius, cy, cx + radius, cy);
+        grad.addColorStop(0,   '#22c55e');
+        grad.addColorStop(0.4, '#eab308');
+        grad.addColorStop(0.7, '#f59e0b');
+        grad.addColorStop(1,   '#ef4444');
+
+        gaugeCtx.beginPath();
+        gaugeCtx.arc(cx, cy, radius, Math.PI, endAngle, true);
+        gaugeCtx.lineWidth = 26;
+        gaugeCtx.strokeStyle = grad;
+        gaugeCtx.lineCap = 'round';
+        gaugeCtx.stroke();
+      }
+
+      // Tick marks
+      for (let tick = 0; tick <= 100; tick += 25) {
+        const angle = Math.PI - (tick / 100) * Math.PI;
+        const outerR = radius + 18;
+        const innerR = radius + 10;
+        const x1 = cx + Math.cos(angle) * innerR;
+        const y1 = cy + Math.sin(angle) * innerR;
+        const x2 = cx + Math.cos(angle) * outerR;
+        const y2 = cy + Math.sin(angle) * outerR;
+
+        gaugeCtx.beginPath();
+        gaugeCtx.moveTo(x1, -y1 + 2 * cy);
+        gaugeCtx.lineTo(x2, -y2 + 2 * cy);
+        gaugeCtx.lineWidth = 2;
+        gaugeCtx.strokeStyle = '#475569';
+        gaugeCtx.lineCap = 'round';
+        gaugeCtx.stroke();
+      }
+
+      // Needle
+      const needleAngle = Math.PI - (score / 100) * Math.PI;
+      const needleLen = radius - 16;
+      const nx = cx + Math.cos(needleAngle) * needleLen;
+      const ny = cy - Math.sin(needleAngle) * needleLen;
+
+      // Needle shadow
+      gaugeCtx.beginPath();
+      gaugeCtx.moveTo(cx, cy);
+      gaugeCtx.lineTo(nx, ny);
+      gaugeCtx.lineWidth = 5;
+      gaugeCtx.strokeStyle = 'rgba(0,0,0,0.3)';
+      gaugeCtx.lineCap = 'round';
+      gaugeCtx.stroke();
+
+      // Needle line
+      gaugeCtx.beginPath();
+      gaugeCtx.moveTo(cx, cy);
+      gaugeCtx.lineTo(nx, ny);
+      gaugeCtx.lineWidth = 3;
+      gaugeCtx.strokeStyle = topPriority === 'HIGH' ? '#ef4444' : topPriority === 'MEDIUM' ? '#f59e0b' : '#22c55e';
+      gaugeCtx.lineCap = 'round';
+      gaugeCtx.stroke();
+
+      // Center dot
+      gaugeCtx.beginPath();
+      gaugeCtx.arc(cx, cy, 6, 0, Math.PI * 2);
+      gaugeCtx.fillStyle = '#e2e8f0';
+      gaugeCtx.fill();
+    }
+
+    // Animate gauge smoothly
+    function animateGauge() {
+      const diff = targetGaugeScore - currentGaugeScore;
+      if (Math.abs(diff) > 0.3) {
+        currentGaugeScore += diff * 0.12;
+      } else {
+        currentGaugeScore = targetGaugeScore;
+      }
+
+      drawGauge(currentGaugeScore);
+
+      // Update score text
+      const rounded = Math.round(currentGaugeScore);
+      gaugeScoreEl.textContent = rounded;
+      gaugeScoreEl.className = 'gauge-score ' +
+        (topPriority === 'HIGH' ? 'danger' : topPriority === 'MEDIUM' ? 'caution' : 'safe');
+
+      requestAnimationFrame(animateGauge);
+    }
+
+    requestAnimationFrame(animateGauge);
+
+    // ════════════════════════════════════════════════
+    //  SCENE STATUS
+    // ════════════════════════════════════════════════
+    function updateSceneStatus(level, text) {
+      sceneStatusEl.className = 'scene-status ' + level;
+      sceneStatusEl.innerHTML = `<div class="scene-dot"></div><span>${text}</span>`;
+    }
+
+    // ════════════════════════════════════════════════
+    //  SPOKEN ALERTS (what the voice actually said)
+    // ════════════════════════════════════════════════
+    async function fetchAlerts() {
+      try {
+        const res = await fetch('/alerts');
+        const alerts = await res.json();
+        if (!alerts.length) {
+          alertHistoryEl.innerHTML = '<div class="alert-empty">No alerts yet</div>';
+          return;
+        }
+        alertHistoryEl.innerHTML = alerts.map(a => `
+          <div class="alert-entry">
+            <span class="alert-time">${esc(a.time)}</span>
+            <span class="alert-dot ${esc(a.priority.toLowerCase())}"></span>
+            <span class="alert-text">${esc(a.text)}</span>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.log('Alert fetch error:', err);
+      }
+    }
+
+    // ════════════════════════════════════════════════
+    //  PRIMARY HAZARD + SCORE BREAKDOWN
+    // ════════════════════════════════════════════════
+    const FACTORS = [
+      ['type', 'Type'], ['distance', 'Distance'], ['position', 'Position'],
+      ['movement', 'Movement'], ['confidence', 'Confidence'],
+    ];
+
+    function breakdownBars(breakdown) {
+      return FACTORS.map(([key, label]) => {
+        const value = Number(breakdown?.[key] ?? 0);
+        const width = Math.min(Math.abs(value), 50) * 2;   // 50 points = full bar
+        return `
+          <div class="factor-row">
+            <span class="factor-name">${label}</span>
+            <span class="factor-track">
+              <span class="factor-fill ${value < 0 ? 'negative' : ''}" style="width:${width}%"></span>
+            </span>
+            <span class="factor-value">${value > 0 ? '+' : ''}${value}</span>
+          </div>`;
+      }).join('');
+    }
+
+    function renderPrimary(top) {
+      if (!top) {
+        primaryEl.innerHTML = '<div class="primary-empty">Nothing to report</div>';
+        return;
+      }
+      const pri = (top.priority || 'LOW').toLowerCase();
+      const motion = top.time_to_contact_s != null
+        ? ` · ${top.closing_speed_mps} m/s · ~${top.time_to_contact_s}s to reach`
+        : movementOf(top);
+      primaryEl.innerHTML = `
+        <div class="primary-head">
+          <div>
+            <div class="primary-name">${esc(top.label)} · ${top.risk_score}</div>
+            <div class="primary-meta">${esc(distanceOf(top))} · ${esc(top.direction || '?')}${esc(motion)}</div>
+          </div>
+          <span class="primary-pill ${pri}">${esc(top.priority)}${top.priority_held ? ' (held)' : ''}</span>
+        </div>
+        ${breakdownBars(top.breakdown)}
+        <div class="primary-reason">${esc(top.reason)}</div>
+      `;
+    }
+
+    // ════════════════════════════════════════════════
+    //  FETCH DETECTIONS
+    // ════════════════════════════════════════════════
+    async function fetchDetections() {
+      try {
+        const res = await fetch('/detections');
+        const data = await res.json();
+
+        if (!data || data.length === 0) {
+          detectionList.innerHTML = '<div class="det-empty">No objects detected</div>';
+          targetGaugeScore = 0;
+          topPriority = 'LOW';
+          renderPrimary(null);
+          updateSceneStatus('safe', 'SAFE — No Hazards');
+          countHighEl.textContent = '0';
+          countMedEl.textContent  = '0';
+          countLowEl.textContent  = '0';
+          flashOverlay.classList.remove('danger');
+          flashBanner.classList.remove('visible');
+          return;
+        }
+
+        // ── Counts ──
+        let nHigh = 0, nMed = 0, nLow = 0;
+        data.forEach(d => {
+          const p = (d.priority || 'LOW').toUpperCase();
+          if (p === 'HIGH') nHigh++;
+          else if (p === 'MEDIUM') nMed++;
+          else nLow++;
+        });
+        countHighEl.textContent = nHigh;
+        countMedEl.textContent  = nMed;
+        countLowEl.textContent  = nLow;
+
+        // ── Gauge → top score ──
+        const top = data[0];
+        targetGaugeScore = top?.risk_score || 0;
+        topPriority = top?.priority || 'LOW';
+        renderPrimary(top);
+
+        // ── Scene status ──
+        if (nHigh > 0)      updateSceneStatus('danger',  'DANGER — ' + nHigh + ' High-Risk Object' + (nHigh > 1 ? 's' : ''));
+        else if (nMed > 0)  updateSceneStatus('caution', 'CAUTION — ' + nMed + ' Medium-Risk Object' + (nMed > 1 ? 's' : ''));
+        else                updateSceneStatus('safe',    'SAFE — Low Risk Only');
+
+        // ── Flash alert (approaching + HIGH) ──
+        const isApproachingDanger = top &&
+          top.priority === 'HIGH' &&
+          top.movement === 'approaching';
+
+        if (isApproachingDanger) {
+          flashOverlay.classList.add('danger');
+          const ttcText = top.time_to_contact_s != null
+            ? ` — ~${top.time_to_contact_s}s` : ` — ${distanceOf(top)}`;
+          flashBanner.textContent = `⚠ ${top.label} APPROACHING${ttcText}`;
+          flashBanner.classList.add('visible');
+        } else {
+          flashOverlay.classList.remove('danger');
+          flashBanner.classList.remove('visible');
+        }
+
+        // ── Render detection list ──
+        detectionList.innerHTML = data.map(obj => {
+          const pri = (obj.priority || 'LOW').toLowerCase();
+          const isPrimary = obj.rank === 1;
+
+          return `
+            <div class="det-tag ${pri}" title="${esc(obj.reason)}">
+              <span class="pri-pill">${pri.toUpperCase()}</span>
+              <span class="det-info">${esc(obj.label)} · ${esc(distanceOf(obj))} · ${esc(obj.direction || '?')}${esc(movementOf(obj))}</span>
+              <span class="det-score">${obj.risk_score}</span>
+              ${isPrimary ? '<span class="primary-badge">Primary</span>' : ''}
+            </div>
+          `;
+        }).join('');
+
+      } catch (err) {
+        console.log('Detection fetch error:', err);
+      }
+    }
+
+    // Poll the server: detections twice a second, spoken alerts every second
+    setInterval(fetchDetections, 500);
+    setInterval(fetchAlerts, 1000);
+
+    // Initial gauge draw
+    drawGauge(0);
+  </script>
+
+</body>
+</html>

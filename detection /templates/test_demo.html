@@ -1,0 +1,834 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visionstra – Hazard Score Test Demo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: #020617;
+      color: #e2e8f0;
+      font-family: 'Inter', system-ui, sans-serif;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(ellipse at 30% 60%, rgba(99,102,241,0.06) 0%, transparent 60%),
+                  radial-gradient(ellipse at 70% 20%, rgba(34,211,238,0.05) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    /* ── Header ── */
+    .header {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 28px;
+      background: rgba(2, 6, 23, 0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid rgba(34, 211, 238, 0.12);
+    }
+
+    .header-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-brand .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: #22d3ee;
+      box-shadow: 0 0 12px rgba(34,211,238,0.6);
+    }
+
+    .header-brand h1 {
+      font-size: 18px;
+      font-weight: 800;
+      letter-spacing: 1px;
+    }
+
+    .header-brand h1 span:first-child { color: #22c55e; }
+    .header-brand h1 span:last-child { color: #38bdf8; }
+
+    .header-nav {
+      display: flex;
+      gap: 8px;
+    }
+
+    .header-nav a {
+      padding: 8px 18px;
+      border-radius: 8px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .header-nav a:hover,
+    .header-nav a.active {
+      color: #22d3ee;
+      border-color: rgba(34,211,238,0.25);
+      background: rgba(34,211,238,0.06);
+    }
+
+    /* ── Page Layout ── */
+    .page {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 20px;
+    }
+
+    .page-title {
+      text-align: center;
+      margin-bottom: 6px;
+    }
+
+    .page-title h2 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #f1f5f9;
+    }
+
+    .page-title h2 span { color: #22d3ee; }
+
+    .page-subtitle {
+      text-align: center;
+      color: #64748b;
+      font-size: 14px;
+      margin-bottom: 30px;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    /* ── Panel ── */
+    .panel {
+      background: rgba(15, 23, 42, 0.75);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(51, 65, 85, 0.5);
+      border-radius: 16px;
+      padding: 24px;
+    }
+
+    .panel-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #64748b;
+      margin-bottom: 18px;
+    }
+
+    /* ── Form ── */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-group select,
+    .form-group input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(2, 6, 23, 0.8);
+      border: 1px solid #334155;
+      border-radius: 10px;
+      color: #e2e8f0;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      appearance: none;
+      -webkit-appearance: none;
+      transition: border-color 0.2s ease;
+    }
+
+    .form-group select:focus,
+    .form-group input:focus {
+      outline: none;
+      border-color: #22d3ee;
+      box-shadow: 0 0 0 3px rgba(34,211,238,0.1);
+    }
+
+    .form-group select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2364748b'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      background-size: 20px;
+      padding-right: 36px;
+    }
+
+    /* Radio group */
+    .radio-group {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .radio-group label {
+      text-transform: none;
+      letter-spacing: 0;
+    }
+
+    .radio-btn {
+      display: none;
+    }
+
+    .radio-label {
+      display: inline-block;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      color: #94a3b8;
+      background: rgba(2, 6, 23, 0.6);
+      border: 1px solid #334155;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .radio-btn:checked + .radio-label {
+      color: #22d3ee;
+      border-color: rgba(34,211,238,0.4);
+      background: rgba(34,211,238,0.1);
+    }
+
+    .radio-label:hover {
+      border-color: #475569;
+    }
+
+    /* Distance slider display */
+    .distance-display {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .distance-display input[type="number"] {
+      width: 100px;
+      text-align: center;
+    }
+
+    .distance-display .unit {
+      color: #64748b;
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .distance-display input[type="range"] {
+      flex: 1;
+      -webkit-appearance: none;
+      appearance: none;
+      height: 6px;
+      border-radius: 4px;
+      background: #1e293b;
+      outline: none;
+    }
+
+    .distance-display input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #22d3ee;
+      cursor: pointer;
+      box-shadow: 0 0 8px rgba(34,211,238,0.4);
+    }
+
+    /* ── Result Display ── */
+    .result-card {
+      text-align: center;
+      padding: 20px;
+    }
+
+    .result-score {
+      font-size: 72px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 6px;
+      transition: color 0.3s ease;
+    }
+
+    .result-score.high { color: #ef4444; }
+    .result-score.medium { color: #f59e0b; }
+    .result-score.low { color: #6b7280; }
+    .result-score.safe { color: #22c55e; }
+
+    .result-priority {
+      display: inline-block;
+      padding: 6px 24px;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      margin-bottom: 16px;
+      transition: all 0.3s ease;
+    }
+
+    .result-priority.high {
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+      box-shadow: 0 0 20px rgba(239,68,68,0.15);
+    }
+
+    .result-priority.medium {
+      background: rgba(245,158,11,0.15);
+      color: #fcd34d;
+      border: 1px solid rgba(245,158,11,0.3);
+    }
+
+    .result-priority.low {
+      background: rgba(100,116,139,0.15);
+      color: #94a3b8;
+      border: 1px solid rgba(100,116,139,0.3);
+    }
+
+    .result-reason {
+      font-size: 13px;
+      color: #94a3b8;
+      line-height: 1.6;
+      text-align: left;
+      padding: 14px;
+      background: rgba(2,6,23,0.5);
+      border-radius: 10px;
+      border: 1px solid #1e293b;
+      margin-top: 16px;
+    }
+
+    .result-reason strong {
+      color: #cbd5e1;
+    }
+
+    /* ── Score Breakdown ── */
+    .breakdown {
+      margin-top: 16px;
+      text-align: left;
+    }
+
+    .breakdown-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid rgba(51,65,85,0.3);
+      font-size: 13px;
+    }
+
+    .breakdown-row:last-child { border-bottom: none; }
+
+    .breakdown-label { color: #94a3b8; font-weight: 500; }
+    .breakdown-value { color: #e2e8f0; font-weight: 700; font-variant-numeric: tabular-nums; }
+
+    .factor-row {
+      display: grid;
+      grid-template-columns: 90px 1fr 52px;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      padding: 6px 0;
+    }
+
+    .factor-name { color: #94a3b8; font-weight: 500; }
+
+    .factor-track {
+      position: relative;
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(51,65,85,0.35);
+      overflow: hidden;
+    }
+
+    .factor-fill {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      border-radius: 4px;
+      background: #22d3ee;
+      transition: width 0.25s ease;
+    }
+
+    .factor-fill.negative { background: #a78bfa; }
+
+    .factor-value {
+      text-align: right;
+      color: #e2e8f0;
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .factor-total {
+      border-top: 1px solid rgba(51,65,85,0.5);
+      margin-top: 6px;
+      padding-top: 10px;
+    }
+
+    .result-flag {
+      display: inline-block;
+      margin: 0 0 12px 8px;
+      padding: 6px 12px;
+      border-radius: 10px;
+      font-size: 12px;
+      font-weight: 800;
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+      border: 1px solid rgba(239,68,68,0.3);
+    }
+
+    .hint {
+      color: #64748b;
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    /* ── Preset Examples ── */
+    .presets-section {
+      margin-top: 24px;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 8px;
+    }
+
+    .preset-btn {
+      padding: 10px 14px;
+      background: rgba(2, 6, 23, 0.7);
+      border: 1px solid #1e293b;
+      border-radius: 10px;
+      color: #cbd5e1;
+      font-family: inherit;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: left;
+      transition: all 0.2s ease;
+    }
+
+    .preset-btn:hover {
+      border-color: #22d3ee;
+      background: rgba(34,211,238,0.05);
+    }
+
+    .preset-btn .preset-name {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 3px;
+    }
+
+    .preset-btn .preset-desc {
+      color: #64748b;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .preset-btn .preset-expect {
+      display: inline-block;
+      margin-top: 4px;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+
+    .preset-btn .preset-expect.high {
+      background: rgba(239,68,68,0.15);
+      color: #fca5a5;
+    }
+
+    .preset-btn .preset-expect.medium {
+      background: rgba(245,158,11,0.15);
+      color: #fcd34d;
+    }
+
+    .preset-btn .preset-expect.low {
+      background: rgba(100,116,139,0.15);
+      color: #94a3b8;
+    }
+
+    /* ── Waiting state ── */
+    .result-waiting {
+      color: #334155;
+      font-size: 14px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    /* ── Responsive ── */
+    @media (max-width: 768px) {
+      .main-grid { grid-template-columns: 1fr; }
+      .preset-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ═══════════════════ HEADER ═══════════════════ -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="logo-dot"></div>
+      <h1><span>VISION</span><span>STRA</span></h1>
+    </div>
+    <div class="header-nav">
+      <a href="/">Live Detection</a>
+      <a href="/test_demo" class="active">Test Demo</a>
+    </div>
+    <div style="width:120px"></div>
+  </header>
+
+  <!-- ═══════════════════ PAGE ═══════════════════ -->
+  <div class="page">
+    <div class="page-title">
+      <h2>Hazard Score <span>Test Demo</span></h2>
+    </div>
+    <p class="page-subtitle">
+      Enter any object, distance, direction, movement and confidence to see the real scoring engine calculate priority and explain every point — no camera needed.
+    </p>
+
+    <div class="main-grid">
+
+      <!-- ─── Input Panel ─── -->
+      <div class="panel">
+        <div class="panel-title">Input Parameters</div>
+
+        <!-- Object Type -->
+        <div class="form-group">
+          <label>Object Type</label>
+          <select id="inputObject" onchange="computeScore()">
+            <optgroup label="Vehicles">
+              <option value="car">Car</option>
+              <option value="bus">Bus</option>
+              <option value="truck">Truck</option>
+              <option value="motorcycle">Motorcycle</option>
+              <option value="train">Train</option>
+            </optgroup>
+            <optgroup label="Bicycles & Riders">
+              <option value="bicycle" selected>Bicycle</option>
+              <option value="skateboard">Skateboard</option>
+            </optgroup>
+            <optgroup label="People">
+              <option value="person">Person</option>
+            </optgroup>
+            <optgroup label="Animals">
+              <option value="dog">Dog</option>
+              <option value="cat">Cat</option>
+              <option value="horse">Horse</option>
+            </optgroup>
+            <optgroup label="Street Obstacles">
+              <option value="bench">Bench</option>
+              <option value="fire hydrant">Fire Hydrant</option>
+              <option value="stop sign">Stop Sign</option>
+              <option value="traffic light">Traffic Light</option>
+            </optgroup>
+            <optgroup label="Low-Risk Objects">
+              <option value="bottle">Bottle</option>
+              <option value="cup">Cup</option>
+              <option value="backpack">Backpack</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <!-- Distance -->
+        <div class="form-group">
+          <label>Distance (meters)</label>
+          <div class="distance-display">
+            <input type="number" id="inputDistance" value="2" min="0" max="30" step="0.5"
+                   onchange="syncSlider(); computeScore()" oninput="syncSlider(); computeScore()">
+            <span class="unit">m</span>
+            <input type="range" id="inputDistSlider" min="0" max="25" step="0.5" value="2"
+                   oninput="syncNumber(); computeScore()">
+          </div>
+        </div>
+
+        <!-- Direction -->
+        <div class="form-group">
+          <label>Direction / Position</label>
+          <div class="radio-group">
+            <input type="radio" name="direction" value="Left" id="dirLeft" class="radio-btn" onchange="computeScore()">
+            <label for="dirLeft" class="radio-label">← Left</label>
+
+            <input type="radio" name="direction" value="Center" id="dirCenter" class="radio-btn" checked onchange="computeScore()">
+            <label for="dirCenter" class="radio-label">◎ Center</label>
+
+            <input type="radio" name="direction" value="Right" id="dirRight" class="radio-btn" onchange="computeScore()">
+            <label for="dirRight" class="radio-label">Right →</label>
+          </div>
+        </div>
+
+        <!-- Movement -->
+        <div class="form-group">
+          <label>Movement</label>
+          <div class="radio-group">
+            <input type="radio" name="movement" value="approaching" id="mvApproach" class="radio-btn" onchange="computeScore()">
+            <label for="mvApproach" class="radio-label">↙ Approaching</label>
+
+            <input type="radio" name="movement" value="stationary" id="mvStill" class="radio-btn" onchange="computeScore()">
+            <label for="mvStill" class="radio-label">● Stationary</label>
+
+            <input type="radio" name="movement" value="receding" id="mvRecede" class="radio-btn" onchange="computeScore()">
+            <label for="mvRecede" class="radio-label">↗ Receding</label>
+
+            <input type="radio" name="movement" value="" id="mvUnknown" class="radio-btn" checked onchange="computeScore()">
+            <label for="mvUnknown" class="radio-label">? Unknown</label>
+          </div>
+        </div>
+
+        <!-- Time to contact -->
+        <div class="form-group">
+          <label>Time to contact (seconds)</label>
+          <input type="number" id="inputTtc" min="0" step="0.5" placeholder="unknown"
+                 oninput="computeScore()">
+          <div class="hint">Only used when approaching. The live camera measures it from how fast the distance shrinks.</div>
+        </div>
+
+        <!-- Confidence -->
+        <div class="form-group">
+          <label>Detection confidence</label>
+          <div class="distance-display">
+            <input type="number" id="inputConf" value="90" min="0" max="100" step="5"
+                   oninput="syncConf('num'); computeScore()">
+            <span class="unit">%</span>
+            <input type="range" id="inputConfSlider" min="0" max="100" step="5" value="90"
+                   oninput="syncConf('slider'); computeScore()">
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── Result Panel ─── -->
+      <div class="panel">
+        <div class="panel-title">Scoring Result</div>
+        <div id="resultArea">
+          <div class="result-waiting">Calculating…</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ─── Preset Examples ─── -->
+    <div class="presets-section panel" style="margin-top: 24px;">
+      <div class="panel-title">Quick Examples — Click to Load</div>
+      <div class="preset-grid" id="presetGrid"></div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════ SCRIPTS ═══════════════════ -->
+  <script>
+    // ── Slider sync ──
+    function syncSlider() {
+      document.getElementById('inputDistSlider').value =
+        document.getElementById('inputDistance').value;
+    }
+
+    function syncNumber() {
+      document.getElementById('inputDistance').value =
+        document.getElementById('inputDistSlider').value;
+    }
+
+    function syncConf(from) {
+      const num = document.getElementById('inputConf');
+      const slider = document.getElementById('inputConfSlider');
+      if (from === 'num') slider.value = num.value; else num.value = slider.value;
+    }
+
+    function esc(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[ch]);
+    }
+
+    // ── Get form values ──
+    function getFormValues() {
+      const name = document.getElementById('inputObject').value;
+      const distance = parseFloat(document.getElementById('inputDistance').value);
+      const direction = document.querySelector('input[name="direction"]:checked')?.value || '';
+      const movement = document.querySelector('input[name="movement"]:checked')?.value || '';
+      const ttcRaw = document.getElementById('inputTtc').value;
+      const time_to_contact_s = ttcRaw === '' ? null : parseFloat(ttcRaw);
+      const confidence = parseFloat(document.getElementById('inputConf').value) / 100;
+      return { name, distance, direction, movement, time_to_contact_s, confidence };
+    }
+
+    async function scoreApi(vals) {
+      const res = await fetch('/api/score', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(vals)
+      });
+      return res.json();
+    }
+
+    // ── Compute score via API ──
+    let computeTimeout = null;
+
+    function computeScore() {
+      clearTimeout(computeTimeout);
+      computeTimeout = setTimeout(async () => {
+        const vals = getFormValues();
+
+        try {
+          const data = await scoreApi(vals);
+          renderResult(data, vals);
+        } catch (err) {
+          console.error('Score API error:', err);
+        }
+      }, 80);
+    }
+
+    // ── Render result ──
+    const FACTORS = [
+      ['type', 'Object type'], ['distance', 'Distance'], ['position', 'Position'],
+      ['movement', 'Movement'], ['confidence', 'Confidence'],
+    ];
+
+    function factorRow(label, value, extraClass = '') {
+      const width = Math.min(Math.abs(value), 50) * 2;   // 50 points = full bar
+      return `
+        <div class="factor-row ${extraClass}">
+          <span class="factor-name">${label}</span>
+          <span class="factor-track">
+            <span class="factor-fill ${value < 0 ? 'negative' : ''}" style="width:${width}%"></span>
+          </span>
+          <span class="factor-value">${value > 0 ? '+' : ''}${value}</span>
+        </div>`;
+    }
+
+    function renderResult(data, vals) {
+      const pri = data.priority.toLowerCase();
+      const rows = FACTORS.map(([key, label]) => factorRow(label, data.breakdown[key])).join('');
+      const cut = data.cutoffs || { HIGH: 70, MEDIUM: 40 };
+
+      document.getElementById('resultArea').innerHTML = `
+        <div class="result-card">
+          <div class="result-score ${pri}">${data.risk_score}</div>
+          <div class="result-priority ${pri}">${data.priority}</div>
+          ${data.imminent ? '<span class="result-flag">⚠ Imminent — raised to HIGH</span>' : ''}
+
+          <div class="breakdown">
+            ${rows}
+            <div class="factor-total">
+              <div class="breakdown-row">
+                <span class="breakdown-label">Score (clamped 0–100)</span>
+                <span class="breakdown-value">${data.risk_score}</span>
+              </div>
+              <div class="breakdown-row">
+                <span class="breakdown-label">Cutoffs</span>
+                <span class="breakdown-value">HIGH ≥ ${cut.HIGH} · MEDIUM ≥ ${cut.MEDIUM}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="result-reason">
+            <strong>Reason:</strong> ${esc(data.reason)}
+          </div>
+        </div>
+      `;
+    }
+
+    // ── Preset examples ──
+    // The badge on each preset is filled in by the real scoring engine, so it
+    // can never drift from the backend.
+    const PRESETS = [
+      { name: 'bicycle', distance: 2, direction: 'Center', title: '🚲 Bicycle — 2m Center' },
+      { name: 'car', distance: 5, direction: 'Center', title: '🚗 Car — 5m Center' },
+      { name: 'person', distance: 8, direction: 'Left', title: '🧑 Person — 8m Left' },
+      { name: 'car', distance: 2, direction: 'Center', movement: 'approaching',
+        title: '🚗 Car — 2m Approaching' },
+      { name: 'car', distance: 10, direction: 'Left', movement: 'approaching', ttc: 1.5,
+        title: '🚗 Car — 10m, 1.5s to contact' },
+      { name: 'truck', distance: 3, direction: 'Center', movement: 'approaching',
+        title: '🚛 Truck — 3m Approaching' },
+      { name: 'dog', distance: 4, direction: 'Right', title: '🐕 Dog — 4m Right' },
+      { name: 'bottle', distance: 1, direction: 'Center', title: '🍾 Bottle — 1m Center' },
+      { name: 'car', distance: 15, direction: 'Left', movement: 'receding',
+        title: '🚗 Car — 15m Receding' },
+      { name: 'bus', distance: 3, direction: 'Center', movement: 'stationary',
+        title: '🚌 Bus — 3m Stationary' },
+      { name: 'bicycle', distance: 2, direction: 'Center', confidence: 30,
+        title: '🚲 Bicycle — 2m, 30% sure' },
+      { name: 'bench', distance: 3, direction: 'Center', title: '🪑 Bench — 3m Center' },
+    ];
+
+    function presetValues(p) {
+      return {
+        name: p.name, distance: p.distance, direction: p.direction,
+        movement: p.movement || '', time_to_contact_s: p.ttc ?? null,
+        confidence: (p.confidence ?? 90) / 100,
+      };
+    }
+
+    function loadPreset(preset) {
+      document.getElementById('inputObject').value = preset.name;
+      document.getElementById('inputDistance').value = preset.distance;
+      document.getElementById('inputDistSlider').value = preset.distance;
+
+      // Direction
+      document.querySelectorAll('input[name="direction"]').forEach(r => {
+        r.checked = r.value === preset.direction;
+      });
+
+      // Movement
+      document.querySelectorAll('input[name="movement"]').forEach(r => {
+        r.checked = r.value === (preset.movement || '');
+      });
+
+      document.getElementById('inputTtc').value = preset.ttc ?? '';
+      document.getElementById('inputConf').value = preset.confidence ?? 90;
+      syncConf('num');
+
+      computeScore();
+    }
+
+    // Render preset buttons
+    const presetGrid = document.getElementById('presetGrid');
+    PRESETS.forEach((p, i) => {
+      const btn = document.createElement('button');
+      btn.className = 'preset-btn';
+      btn.onclick = () => loadPreset(p);
+      btn.innerHTML = `<span class="preset-name">${p.title}</span><span class="preset-expect">…</span>`;
+      presetGrid.appendChild(btn);
+
+      scoreApi(presetValues(p)).then(data => {
+        const badge = btn.querySelector('.preset-expect');
+        badge.className = `preset-expect ${data.priority.toLowerCase()}`;
+        badge.textContent = `${data.priority} · ${data.risk_score}`;
+      }).catch(() => {});
+    });
+
+    // ── Initial computation ──
+    computeScore();
+  </script>
+
+</body>
+</html>
