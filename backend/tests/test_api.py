@@ -82,6 +82,8 @@ class TestDetectEndpoint(unittest.TestCase):
         self.assertEqual([d["priority"] for d in ranked], ["HIGH", "MEDIUM", "LOW"])
         self.assertEqual(ranked[0]["rank"], 1)
         self.assertIn("breakdown", ranked[0])
+        self.assertIn("risk_score", ranked[0])
+        self.assertIn("reason", ranked[0])
         self.assertEqual(ranked[0]["confidence"], 0.9)
         # Exactly one sentence, on the primary hazard.
         self.assertIn("Warning: bicycle", ranked[0]["announcement"])
